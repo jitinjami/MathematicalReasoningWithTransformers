@@ -72,7 +72,7 @@ class Vocabulary:
 class ParallelTextDataset(Dataset):
 
     def __init__(self, src_file_path, tgt_file_path, src_vocab=None,
-                 tgt_vocab=None, extend_vocab=False, device=mydevice):
+                 tgt_vocab=None, extend_vocab=False, device="cpu"):
         (self.data, self.src_vocab, self.tgt_vocab, self.src_max_seq_length,
          self.tgt_max_seq_length) = self.parallel_text_to_data(
             src_file_path, tgt_file_path, src_vocab, tgt_vocab, extend_vocab,
@@ -86,7 +86,7 @@ class ParallelTextDataset(Dataset):
 
     def parallel_text_to_data(self, src_file, tgt_file, src_vocab=None,
                               tgt_vocab=None, extend_vocab=False,
-                              device=mydevice):
+                              device="cpu"):
         # Convert paired src/tgt texts into torch.tensor data.
         # All sequences are padded to the length of the longest sequence
         # of the respective file.
@@ -211,13 +211,13 @@ class TokenEmbedding(nn.Module):
 # transformer
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, num_encoder_layers: int, num_decoder_layers: int,
-                 emb_size: int, src_vocab_size: int, tgt_vocab_size: int,
+                 emb_size: int, src_vocab_size: int, tgt_vocab_size: int, nhead: int,
                  dim_feedforward:int = 1024, dropout:float = 0.1):
         super(Seq2SeqTransformer, self).__init__()
-        encoder_layer = TransformerEncoderLayer(d_model=emb_size, nhead=NHEAD,
+        encoder_layer = TransformerEncoderLayer(d_model=emb_size, nhead=nhead,
                                                 dim_feedforward=dim_feedforward)
         self.transformer_encoder = TransformerEncoder(encoder_layer, num_layers=num_encoder_layers)
-        decoder_layer = TransformerDecoderLayer(d_model=emb_size, nhead=NHEAD,
+        decoder_layer = TransformerDecoderLayer(d_model=emb_size, nhead=nhead,
                                                 dim_feedforward=dim_feedforward)
         self.transformer_decoder = TransformerDecoder(decoder_layer, num_layers=num_decoder_layers)
         self.generator = nn.Linear(emb_size, tgt_vocab_size)
@@ -244,22 +244,23 @@ class Seq2SeqTransformer(nn.Module):
                           self.tgt_tok_emb(tgt)), memory,
                           tgt_mask)
 
-def generate_square_subsequent_mask(sz):
+def generate_square_subsequent_mask(sz, mydevice):
     mask = (torch.triu(torch.ones((sz, sz), device=mydevice)) == 1).transpose(0, 1)
     mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
     return mask
-def create_mask(src, tgt):
+
+def create_mask(src, tgt, src_vocab, mydevice):
     src_seq_len = src.shape[0]
     tgt_seq_len = tgt.shape[0]
 
-    tgt_mask = generate_square_subsequent_mask(tgt_seq_len)
+    tgt_mask = generate_square_subsequent_mask(tgt_seq_len, mydevice)
     src_mask = torch.zeros((src_seq_len, src_seq_len), device=mydevice).type(torch.bool)
 
     src_padding_mask = (src == src_vocab.pad_id).transpose(0, 1)
     tgt_padding_mask = (tgt == src_vocab.pad_id).transpose(0, 1)
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
-def train_epoch(model, train_data_loader, optimizer):
+def train_epoch(model, train_data_loader, optimizer, mydevice, loss_fn):
     model.train()
     losses = 0
     for idx, (src, tgt) in enumerate(train_data_loader):
@@ -267,7 +268,7 @@ def train_epoch(model, train_data_loader, optimizer):
         tgt = tgt.to(mydevice)
         tgt_input = tgt[:-1, :]
 
-        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input)
+        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input, mydevice)
 
         logits = model(src, tgt_input, src_mask, tgt_mask,
                        src_padding_mask, tgt_padding_mask, src_padding_mask)
@@ -287,7 +288,7 @@ def train_epoch(model, train_data_loader, optimizer):
     return losses / len(train_data_loader)
 
 
-def evaluate(model, valid_data_loader):
+def evaluate(model, valid_data_loader, mydevice, loss_fn):
     model.eval()
     losses = 0
     for idx, (src, tgt) in (enumerate(valid_data_loader)):
@@ -296,7 +297,7 @@ def evaluate(model, valid_data_loader):
 
         tgt_input = tgt[:-1, :]
 
-        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input)
+        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input, mydevice)
         logits = model(src, tgt_input, src_mask, tgt_mask,
                        src_padding_mask, tgt_padding_mask, src_padding_mask)
         tgt_out = tgt[1:, :]
@@ -304,7 +305,7 @@ def evaluate(model, valid_data_loader):
         losses += loss.item()
     return losses / len(valid_data_loader)
 
-def greedy_decode(model, src, src_mask, max_len, start_symbol):
+def greedy_decode(model, src_vocab, src, src_mask, max_len, start_symbol, mydevice):
     src = src.to(mydevice)
     src_mask = src_mask.to(mydevice)
     memory = model.encode(src, src_mask)
@@ -312,7 +313,7 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
     for i in range(max_len-1):
         memory = memory.to(mydevice)
         memory_mask = torch.zeros(ys.shape[0], memory.shape[0]).to(mydevice).type(torch.bool)
-        tgt_mask = (generate_square_subsequent_mask(ys.size(0))
+        tgt_mask = (generate_square_subsequent_mask(ys.size(0), mydevice)
                                     .type(torch.bool)).to(mydevice)
         out = model.decode(ys, memory, tgt_mask)
         out = out.transpose(0, 1)
@@ -333,10 +334,10 @@ def translate(model, src, src_vocab, tgt_vocab, tgt_length):
     num_tokens = len(tokens)
     src = (torch.LongTensor(tokens).reshape(num_tokens, 1))
     src_mask = (torch.zeros(num_tokens, num_tokens)).type(torch.bool)
-    tgt_tokens = greedy_decode(transformer, src, src_mask, max_len=tgt_length + 2, start_symbol=src_vocab.sos_id).flatten()
+    tgt_tokens = greedy_decode(transformer, src_vocab, src, src_mask, max_len=tgt_length + 2, start_symbol=src_vocab.sos_id).flatten()
     return "".join([tgt_vocab.id_to_string[int(tok)] for tok in tgt_tokens]).replace("<sos>", "").replace("<eos>", "")
 
-def batch_greedy(data : DataLoader, num_batches: int = 10):
+def batch_greedy(model, src_vocab, tgt_vocab, data : DataLoader, num_batches: int = 10):
     score = 0
     for idx, batch in enumerate(data):
         questions = batch[0].T
@@ -347,7 +348,7 @@ def batch_greedy(data : DataLoader, num_batches: int = 10):
             answer_text = [tgt_vocab.id_to_string[int(i)] for i in answer]
             answer_text = "".join(answer_text).replace("<sos>", "").replace("<eos>", "").replace("<pad>","")
 
-            soln = translate(transformer, question_text, src_vocab, tgt_vocab, len(answer_text))
+            soln = translate(model, question_text, src_vocab, tgt_vocab, len(answer_text))
             if (soln == answer_text):
                 score += 1
                 print(question_text)
@@ -355,7 +356,7 @@ def batch_greedy(data : DataLoader, num_batches: int = 10):
         if idx >= num_batches:
             break
 
-def Accuracy_Computation(data : DataLoader):
+def Accuracy_Computation(model, src_vocab, tgt_vocab, data : DataLoader):
     score = 0
     for idx, batch in enumerate(data):
         questions = batch[0].T
@@ -366,7 +367,7 @@ def Accuracy_Computation(data : DataLoader):
             answer_text = [tgt_vocab.id_to_string[int(i)] for i in answer]
             answer_text = "".join(answer_text).replace("<sos>", "").replace("<eos>", "").replace("<pad>","")
 
-            soln = translate(transformer, question_text, src_vocab, tgt_vocab, len(answer_text))
+            soln = translate(model, question_text, src_vocab, tgt_vocab, len(answer_text))
             if (soln == answer_text):
                 score += 1
         if idx >= 100:
@@ -427,7 +428,7 @@ NUM_DECODER_LAYERS = 2
 NUM_EPOCHS = 20
 
 transformer = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS,
-                                 EMB_SIZE, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE,
+                                 EMB_SIZE, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, NHEAD,
                                  FFN_HID_DIM)
 
 for p in transformer.parameters():
@@ -452,11 +453,11 @@ a_s = [a1, a2, a3]
 
 for epoch in range(1, NUM_EPOCHS+1):
     start_time = time.time()
-    train_loss = train_epoch(transformer, train_data_loader, optimizer)
+    train_loss = train_epoch(transformer, train_data_loader, optimizer, mydevice, loss_fn)
     end_time = time.time()
-    val_loss = evaluate(transformer, valid_data_loader)
-    accu_train = Accuracy_Computation(train_data_loader)
-    accu_valid = Accuracy_Computation(valid_data_loader)
+    val_loss = evaluate(transformer, valid_data_loader, mydevice, loss_fn)
+    accu_train = Accuracy_Computation(transformer, src_vocab, tgt_vocab, train_data_loader)
+    accu_valid = Accuracy_Computation(transformer, src_vocab, tgt_vocab, valid_data_loader)
     print((f"Epoch: {epoch}, Train loss: {train_loss:.8f}, Val loss: {val_loss:.8f}, "
             f"Epoch time = {(end_time - start_time):.8f}s, Training Accuracy: {accu_train}, Validation Accuracy: {accu_valid}"))
     if epoch % 5 == 0:
@@ -466,8 +467,8 @@ for epoch in range(1, NUM_EPOCHS+1):
 
 #transformer.load_state_dict(torch.load('runs1/math1.pth', map_location=torch.device('cpu') ))
 
-accu_train = Accuracy_Computation(train_data_loader)
-accu_valid = Accuracy_Computation(valid_data_loader)
+accu_train = Accuracy_Computation(transformer, src_vocab, tgt_vocab, train_data_loader)
+accu_valid = Accuracy_Computation(transformer, src_vocab, tgt_vocab, valid_data_loader)
 print(f"Training Accuracy: {accu_train}, Validation Accuracy: {accu_valid}")
 
 print("Final predictions")
