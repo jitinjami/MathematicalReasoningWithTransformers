@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+import pickle
 
 import torch
 import torch.nn as nn
@@ -27,7 +28,7 @@ def main():
     mydevice = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cwd = os.getcwd()
     cfg.DATASET_DIR = cwd + "/data"
-    cfg.MODEL_SAVE_PATH = cwd + "/results/" + cfg.TASK + ".pth"
+    cfg.MODEL_SAVE_PATH = cwd + "/results/"
 
     src_file_path = f"{cfg.DATASET_DIR}/{cfg.TASK}/{cfg.TRAIN_FILE_NAME}{cfg.INPUTS_FILE_ENDING}"
     tgt_file_path = f"{cfg.DATASET_DIR}/{cfg.TASK}/{cfg.TRAIN_FILE_NAME}{cfg.TARGETS_FILE_ENDING}"
@@ -37,6 +38,16 @@ def main():
     #get the vocab
     src_vocab = train_set.src_vocab
     tgt_vocab = train_set.tgt_vocab
+
+    print(type(src_vocab))
+    #save the vocab
+    with open(cfg.MODEL_SAVE_PATH + "src_vocab.pickle", "wb") as outfile:
+        pickle.dump(src_vocab, outfile)
+    
+    with open(cfg.MODEL_SAVE_PATH + "tgt_vocab.pickle", "wb") as outfile:
+        pickle.dump(tgt_vocab, outfile)
+    
+    print("Saved vocab files")
 
     src_file_path = f"{cfg.DATASET_DIR}/{cfg.TASK}/{cfg.VALID_FILE_NAME}{cfg.INPUTS_FILE_ENDING}"
     tgt_file_path = f"{cfg.DATASET_DIR}/{cfg.TASK}/{cfg.VALID_FILE_NAME}{cfg.TARGETS_FILE_ENDING}"
@@ -73,7 +84,7 @@ def main():
     
     for epoch in range(1, cfg.NUM_EPOCHS+1):
         start_time = time.time()
-        train_loss = train_epoch(transformer, train_data_loader, src_vocab, optimizer, mydevice, loss_fn, cfg.MODEL_SAVE_PATH)
+        train_loss = train_epoch(transformer, train_data_loader, src_vocab, optimizer, mydevice, loss_fn, cfg.MODEL_SAVE_PATH + cfg.TASK + ".pth")
         end_time = time.time()
         val_loss = evaluate(transformer, valid_data_loader, src_vocab, mydevice, loss_fn)
         accu_train = Accuracy_Computation(transformer, src_vocab, tgt_vocab, mydevice, train_data_loader)

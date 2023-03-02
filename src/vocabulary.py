@@ -56,4 +56,4 @@ class Vocabulary:
             self.add_new_word(string)
             return self.string_to_id[string]
         else:
-            return self.unk_id
+            return self.unk_id        
