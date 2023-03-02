@@ -2,7 +2,7 @@
 
 This project is about implementing an encoder-decoder based [Transformer](https://arxiv.org/abs/1706.03762) using PyTorch to solve basic mathematical problems that are subsets of the [DeepMind mathematical dataset](https://github.com/deepmind/mathematics_dataset).
 
-We treat this problem as a character-level sequence-to-sequence mapping prob- lem: the encoder reads the question as the input sequence, and the decoder outputs the answer sequence
+We treat this problem as a character-level sequence-to-sequence mapping problem: the encoder reads the question as the input sequence, and the decoder outputs the answer sequence
 
 ## Motivation
 This project was a part of Assignment 4 of the "Deep Learning Lab" course at USI, Lugano taken by [Dr. Kazuki Irie](https://people.idsia.ch/~kazuki/).

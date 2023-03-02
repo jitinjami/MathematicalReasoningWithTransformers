@@ -1,0 +1,27 @@
+Loading source file from: /home/jami/MathematicalReasoningWithTransformers/data/numbers__place_value/train.x
+Loading target file from: /home/jami/MathematicalReasoningWithTransformers/data/numbers__place_value/train.y
+Done.
+Loading source file from: /home/jami/MathematicalReasoningWithTransformers/data/numbers__place_value/interpolate.x
+Loading target file from: /home/jami/MathematicalReasoningWithTransformers/data/numbers__place_value/interpolate.y
+Done.
+Epoch: 1, Train loss: 0.62687089, Val loss: 0.12488521, Epoch time = 1021.85162783s, Training Accuracy: 9498.4375, Validation Accuracy: 9321.875
+Epoch: 2, Train loss: 0.13679168, Val loss: 0.00182509, Epoch time = 1092.28561449s, Training Accuracy: 10059.375, Validation Accuracy: 10093.75
+Epoch: 3, Train loss: 0.05123695, Val loss: 0.00024289, Epoch time = 970.86904836s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 4, Train loss: 0.02866195, Val loss: 0.00008714, Epoch time = 959.78928804s, Training Accuracy: 10095.3125, Validation Accuracy: 10100.0
+Epoch: 5, Train loss: 0.01960563, Val loss: 0.00006833, Epoch time = 962.41903067s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 6, Train loss: 0.01485505, Val loss: 0.00031957, Epoch time = 967.93069506s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 7, Train loss: 0.01196679, Val loss: 0.00001352, Epoch time = 974.29141355s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 8, Train loss: 0.00873165, Val loss: 0.00001117, Epoch time = 974.06235003s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 9, Train loss: 0.00794406, Val loss: 0.00001420, Epoch time = 973.75245094s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 10, Train loss: 0.00611830, Val loss: 0.00029375, Epoch time = 974.42783785s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 11, Train loss: 0.00612560, Val loss: 0.00000667, Epoch time = 992.63553691s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 12, Train loss: 0.00485449, Val loss: 0.00000441, Epoch time = 990.37121677s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 13, Train loss: 0.00437709, Val loss: 0.00000195, Epoch time = 1037.21615076s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 14, Train loss: 0.00380083, Val loss: 0.00001524, Epoch time = 970.12305546s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 15, Train loss: 0.00401362, Val loss: 0.00000151, Epoch time = 965.11173940s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 16, Train loss: 0.00330221, Val loss: 0.00000034, Epoch time = 971.18225718s, Training Accuracy: 10096.875, Validation Accuracy: 10100.0
+Epoch: 17, Train loss: 0.00289344, Val loss: 0.00000058, Epoch time = 967.67635608s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 18, Train loss: 0.00327568, Val loss: 0.00126428, Epoch time = 967.21526361s, Training Accuracy: 10087.5, Validation Accuracy: 10092.1875
+Epoch: 19, Train loss: 0.00287325, Val loss: 0.00000341, Epoch time = 974.85216546s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Epoch: 20, Train loss: 0.00246382, Val loss: 0.00000140, Epoch time = 974.22686553s, Training Accuracy: 10100.0, Validation Accuracy: 10100.0
+Training Accuracy: 10100.0, Validation Accuracy: 10100.0
