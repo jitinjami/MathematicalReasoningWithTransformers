@@ -11,19 +11,11 @@ from config.defaults import _C as cfg
 from src.text_dataset import ParallelTextDataset
 from src.utils import generate_batch, train_epoch, evaluate, Accuracy_Computation, translate
 from src.model import Seq2SeqTransformer
-
-def get_args():
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("opts", default=[], nargs=argparse.REMAINDER,
-                        help="Modify src.defaults")
-    args = parser.parse_args()
-    return args
+from config.defaults import get_cfg_defaults
 
 def main():
 
-    args = get_args()
-    cfg.merge_from_list(args.opts) #'defaults.py' has some default settings, if they have been changed by args, that gets consolidated here
-    #cfg.freeze()
+    cfg = get_cfg_defaults()
 
     mydevice = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cwd = os.getcwd()
@@ -41,10 +33,10 @@ def main():
 
     print(type(src_vocab))
     #save the vocab
-    with open(cfg.MODEL_SAVE_PATH + "src_vocab.pickle", "wb") as outfile:
+    with open(cfg.MODEL_SAVE_PATH + cfg.TASK + "_src_vocab.pickle", "wb") as outfile:
         pickle.dump(src_vocab, outfile)
     
-    with open(cfg.MODEL_SAVE_PATH + "tgt_vocab.pickle", "wb") as outfile:
+    with open(cfg.MODEL_SAVE_PATH + cfg.TASK + "_tgt_vocab.pickle", "wb") as outfile:
         pickle.dump(tgt_vocab, outfile)
     
     print("Saved vocab files")
