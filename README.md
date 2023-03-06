@@ -42,5 +42,3 @@ To generate positional encoding for the source and target dataset before encoder
 4. `Seq2SeqTransformer`
 
 The main transformer model with positional encoding, embedding, encoder, decoder and output linear layer.
-
-A report can be found explaining my findings in this repo titled `Report.pdf`
