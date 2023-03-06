@@ -1,5 +1,5 @@
 from src.utils import translate
-from src.defaults import _C as cfg
+from config.defaults import _C as cfg
 import argparse
 import os
 import pickle

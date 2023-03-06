@@ -19,3 +19,11 @@ _C.BATCH_SIZE = 64
 _C.NUM_ENCODER_LAYERS = 3
 _C.NUM_DECODER_LAYERS = 2
 _C.NUM_EPOCHS = 20
+
+def get_cfg_defaults():
+    """
+    Get a yacs CfgNode object with default values
+    """
+    # Return a clone so that the defaults will not be altered
+    # It will be subsequently overwritten with local YAML.
+    return _C.clone()

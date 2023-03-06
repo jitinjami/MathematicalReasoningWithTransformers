@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from src.defaults import _C as cfg
+from config.defaults import _C as cfg
 from src.text_dataset import ParallelTextDataset
 from src.utils import generate_batch, train_epoch, evaluate, Accuracy_Computation, translate
 from src.model import Seq2SeqTransformer
