@@ -4,9 +4,6 @@ This project is about implementing an encoder-decoder based [Transformer](https:
 
 We treat this problem as a character-level sequence-to-sequence mapping problem: the encoder reads the question as the input sequence, and the decoder outputs the answer sequence
 
-## Motivation
-This project was a part of Assignment 4 of the "Deep Learning Lab" course at USI, Lugano taken by [Dr. Kazuki Irie](https://people.idsia.ch/~kazuki/).
-
 ## Tech used
 <b>Built with</b>
 - [Python3](https://www.python.org)
