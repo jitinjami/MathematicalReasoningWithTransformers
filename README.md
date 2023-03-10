@@ -65,5 +65,4 @@ A stopping mechanism was implemented to terminate greedy search once the `<eos>`
 A batch mode evaluation implementation was carried out in the [batch_greedy](./src/utils.py#L107) function where the greedy search is carried out batch by batch. The evaluation moves to the next batch only once we finish all the questions in this batch. There is also an argument to set the number of batches you want to carry out greedy search on, by default this is set to 10. The function also prints the question and prediction for predictions that are correct.
 
 ## Demo
-
 A demo can be found in the [demo.ipynb](./demo.ipynb) jupyter notebook.
