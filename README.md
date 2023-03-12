@@ -31,7 +31,7 @@ _Answer_: 2
 The preprocessed dataset can be found in [Numbers - Place value](./data/numbers__place_value/) folder. The module consists of `train.x` (_questions_) and `train.y` (_answers_) for training and `interpolate.x` (_questions_) and `interpolate.y` (_answers_) for validation. Here is quick run down of the dataset properties:
 
 
-| Syntax      | Description | Description |
+|       | Training Set | Validation Set |
 | ----------- | ----------- | ----------- |
 | Character vocabulary size      | 33       | 33       |
 | Number of questions   | 1999998        | 10000        |
